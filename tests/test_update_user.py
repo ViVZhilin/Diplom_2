@@ -1,6 +1,7 @@
 import allure
 import datetime
-from data.data import Data
+from data.urls import Urls
+from data.data import ErrorMessages
 
 
 @allure.feature("Изменение данных пользователя")
@@ -13,12 +14,12 @@ class TestUpdateUser:
             "name": current_time
         }
         headers = {"Authorization": auth_token}
-        response = api_client.patch("/auth/user", data=update_data, headers=headers)
+        response = api_client.patch(Urls.USER, data=update_data, headers=headers)
 
         # Проверка ответа
-        assert response.status_code == 200, f"Ожидался код 200, но получен {response.status_code}"
-        assert response.json()["success"] is True, "Обновление данных не было успешным"
-        assert response.json()["user"]["name"] == current_time, "Имя пользователя не обновилось"
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        assert response.json()["user"]["name"] == current_time
 
     @allure.title("Изменение данных без авторизации")
     def test_update_user_unauthorized(self, api_client):
@@ -26,9 +27,9 @@ class TestUpdateUser:
         update_data = {
             "name": "Unauthorized Update"
         }
-        response = api_client.patch("/auth/user", data=update_data)
+        response = api_client.patch(Urls.USER, data=update_data)
 
         # Проверка ответа
-        assert response.status_code == 401, f"Ожидался код 401, но получен {response.status_code}"
-        assert response.json()["success"] is False, "Ожидалось, что success будет False"
-        assert response.json()["message"] == "You should be authorised", "Неверное сообщение об ошибке"
+        assert response.status_code == 401
+        assert response.json()["success"] is False
+        assert response.json()["message"] == ErrorMessages.UNAUTHORIZED

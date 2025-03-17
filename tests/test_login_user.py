@@ -1,6 +1,7 @@
 import allure
 from data.data import Data
-
+from data.data import ErrorMessages
+from data.urls import Urls
 
 @allure.feature("Авторизация пользователя")
 class TestLoginUser:
@@ -11,12 +12,12 @@ class TestLoginUser:
             "email": Data.client_email,
             "password": Data.client_password
         }
-        response = api_client.post("/auth/login", data=data)
+        response = api_client.post(Urls.LOGIN, data=data)
 
         # Проверка ответа
-        assert response.status_code == 200, f"Ожидался код 200, но получен {response.status_code}"
-        assert response.json()["success"] is True, "Авторизация не была успешной"
-        assert "accessToken" in response.json(), "В ответе отсутствует токен"
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        assert "accessToken" in response.json()
 
     @allure.title("Логин с неверным логином и паролем")
     def test_login_invalid_credentials(self, api_client):
@@ -25,9 +26,9 @@ class TestLoginUser:
             "email": "invalid_data",
             "password": "invalid_data"
         }
-        response = api_client.post("/auth/login", data=data)
+        response = api_client.post(Urls.LOGIN, data=data)
 
         # Проверка ответа
-        assert response.status_code == 401, f"Ожидался код 401, но получен {response.status_code}"
-        assert response.json()["success"] is False, "Ожидалось, что success будет False"
-        assert response.json()["message"] == "email or password are incorrect", "Неверное сообщение об ошибке"
+        assert response.status_code == 401
+        assert response.json()["success"] is False
+        assert response.json()["message"] == ErrorMessages.INCORRECT_CREDENTIALS

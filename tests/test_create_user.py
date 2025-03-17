@@ -1,4 +1,6 @@
 import allure
+from data.data import ErrorMessages
+from data.urls import Urls
 
 @allure.feature("Создание пользователя")
 class TestCreateUser:
@@ -9,7 +11,7 @@ class TestCreateUser:
             "password": api_client.generate_password(),
             "name": api_client.generate_name()
         }
-        response = api_client.post("/auth/register", data=data)
+        response = api_client.post(Urls.REGISTER, data=data)
         assert response.status_code == 200
         assert response.json()["success"] is True
 
@@ -21,12 +23,12 @@ class TestCreateUser:
             "name": "Existing User"
         }
         # Первый запрос (успешная регистрация)
-        api_client.post("/auth/register", data=data)
+        api_client.post(Urls.REGISTER, data=data)
         # Второй запрос (пользователь уже существует)
-        response = api_client.post("/auth/register", data=data)
+        response = api_client.post(Urls.REGISTER, data=data)
         assert response.status_code == 403
         assert response.json()["success"] is False
-        assert response.json()["message"] == "User already exists"
+        assert response.json()["message"] == ErrorMessages.USER_ALREADY_EXISTS
 
     @allure.title("Создание пользователя без обязательного поля")
     def test_create_user_missing_field(self, api_client):
@@ -34,7 +36,7 @@ class TestCreateUser:
             "email": api_client.generate_email(),
             "password": api_client.generate_password()
         }
-        response = api_client.post("/auth/register", data=data)
+        response = api_client.post(Urls.REGISTER, data=data)
         assert response.status_code == 403
         assert response.json()["success"] is False
-        assert response.json()["message"] == "Email, password and name are required fields"
+        assert response.json()["message"] == ErrorMessages.REQUIRED_FIELDS
